@@ -1,0 +1,83 @@
+import tkinter as tk
+from tkinter import messagebox
+
+def arithmetic_arranger(problems, show_answers=False):
+    # Check the number of problems
+    if len(problems) > 5:
+        return 'Error: Too many problems.'
+
+    # Initialize lists for each row of the result
+    first_value = []
+    second_value = []
+    lines = []
+    results = []
+
+    # Validate and format each problem
+    for problem in problems:
+        try:
+            left_value, operator, right_value = problem.split()
+        except ValueError:
+            return "Error: Each problem must be in the format 'number operator number'."
+
+        # Check if the operator is either '+' or '-'
+        if operator not in ['+', '-']:
+            return "Error: Operator must be '+' or '-'."
+
+        # Check if both values are digits
+        if not (left_value.isdigit() and right_value.isdigit()):
+            return 'Error: Numbers must only contain digits.'
+
+        # Check if each value is less than 4 digits long
+        if len(left_value) > 4 or len(right_value) > 4:
+            return 'Error: Numbers cannot be more than four digits.'
+
+        # Calculate width for alignment
+        width = max(len(left_value), len(right_value)) + 2
+        first_value.append(left_value.rjust(width))
+        second_value.append(operator + " " + right_value.rjust(width - 2))
+        lines.append('-' * width)
+
+        # Calculate result if requested
+        if show_answers:
+            result = str(int(left_value) + int(right_value)) if operator == '+' else str(int(left_value) - int(right_value))
+            results.append(result.rjust(width))
+
+    # Combine rows with 4 spaces between problems
+    arranged_problems = '    '.join(first_value) + '\n' + '    '.join(second_value) + '\n' + '    '.join(lines)
+    if show_answers:
+        arranged_problems += '\n' + '    '.join(results)
+
+    return arranged_problems
+
+# Tkinter GUI setup
+def submit_problems():
+    # Get the text input, split by lines, and remove empty lines
+    raw_input = text_input.get("1.0", tk.END).strip().splitlines()
+    problems = [line.strip() for line in raw_input if line.strip()]
+
+    # Call arithmetic_arranger and display the result
+    result = arithmetic_arranger(problems, show_answers_var.get())
+    result_label.config(text=result)
+
+# Initialize Tkinter window
+top = tk.Tk()
+top.title("Arithmetic Arranger")
+
+# Text widget for multi-line input
+text_input = tk.Text(top, width=40, height=5)
+text_input.pack(pady=10)
+
+# Checkbox for showing answers
+show_answers_var = tk.BooleanVar()
+show_answers_checkbox = tk.Checkbutton(top, text="Show Answers", variable=show_answers_var)
+show_answers_checkbox.pack()
+
+# Submit button
+submit_button = tk.Button(top, text="Arrange Problems", command=submit_problems)
+submit_button.pack(pady=10)
+
+# Label to display arranged problems
+result_label = tk.Label(top, text="", font=("Courier", 12), justify="left")
+result_label.pack(pady=10)
+
+top.mainloop()
